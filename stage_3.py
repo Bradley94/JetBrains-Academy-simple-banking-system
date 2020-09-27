@@ -1,7 +1,5 @@
 """
-***WORK IN PROGRESS, UNFINISHED***
-
-
+***TASK INSTRUCTIONS***
 In this stage, create a database named card.s3db with a table titled card. It should have the following columns:
 
 id INTEGER
@@ -10,6 +8,14 @@ pin TEXT
 balance INTEGER DEFAULT 0
 Pay attention: your database file should be created when the program starts, if it hasn’t yet been created. 
 And all created cards should be stored in the database from now.
+
+Do not forget to commit your DB changes right after executing a query!
+
+***MY NOTES***
+Parts of this code need to be re-done such as removing the return of customer details in a list and instead having
+them be pulled straight from the databse when using the login function. I have left this on this part for now as it 
+isn't necessary to completing the part where I just need to set up the database and table and insert card details,
+instead I can edit this in the final iteration of the code.
 """
 
 import random
@@ -27,7 +33,6 @@ def create_table():
         balance INTEGER DEFAULT 0
     )""")
 
-
     # Commit and close
     conn.commit()
     conn.close()
@@ -38,7 +43,7 @@ def add_customer(number, pin):
     """Add customer details permanently to the table and database"""
     conn = sqlite3.connect('card.s3db')
     c = conn.cursor()
-    c.execute("INSERT INTO card VALUES (?,?)", (number, pin))
+    c.execute("INSERT INTO card (number, pin) VALUES (?,?)", (number, pin))
     # Commit and close
     conn.commit()
     conn.close()
@@ -79,13 +84,11 @@ def create_account(customer):
     random.seed()
     
     a = random.randint(000000000, 999999999) # now 9 digits for checksum algorithm to work
-    a = str(a).zfill(9) # ensures second part of card number is 9 digits long even with zeroes
+    a = str(a).zfill(9)  # ensures second part of card number is 9 digits long even with zeroes
     card_number = str(400000) + str(a)
     user_password = random.randint(0000, 9999)
-    user_password = str(user_password).zfill(4) # ensures password is 4 digits long even with zeroes
+    user_password = str(user_password).zfill(4)  # ensures password is 4 digits long even with zeroes
 
-    print("TESTING CARDNUM BEFORE LUHN:")
-    print(card_number)
     # find and add checksum
     checksum = luhn_checksum(card_number)
     card_number_final = str(card_number) + str(checksum)
@@ -93,7 +96,8 @@ def create_account(customer):
     txt = "Your card has been created \nYour card number: \n{cardnum}"\
           "\nYour card PIN: \n{cardpin}".format(cardnum = card_number_final, cardpin = user_password)
     print(txt)
-          
+    add_customer(card_number_final, user_password)
+    # TODO remove return statement and have it so all details are later grabbed from the databse itself
     customer = [card_number_final, user_password]  
     return customer
 
